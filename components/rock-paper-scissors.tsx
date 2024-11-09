@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useTransition, useEffect } from 'react'
+import React, {useMemo, useState, useCallback, useTransition, useEffect } from 'react'
 import axios from 'axios'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,12 +14,22 @@ export function RockPaperScissorsComponent() {
   const [victories, setVictories] = useState(0)
   const [losses, setLosses] = useState(0)
   const [ties, setTies] = useState(0)
-  const [gameHistory, setGameHistory] = useState([])
+  type Outcome = 'You win!' | 'Computer wins!' | 'It\'s a tie!';
+  type Choice = 'rock' | 'paper' | 'scissors';
+  interface GameHistory {
+    userChoice: Choice;
+    computerChoice: Choice;
+    result: Outcome;
+    random: boolean;  
+  }
+
+  const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const [isRandomChoice, setIsRandomChoice] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [userId, setUserId] = useState('')
-  const choices = ['rock', 'paper', 'scissors']
+  const choices = useMemo<Choice[]>(() => ['rock', 'paper', 'scissors'], []);
+  
 
   useEffect(() => {
     const generateUserId = () => {
@@ -29,92 +39,93 @@ export function RockPaperScissorsComponent() {
     setUserId(id)
   }, [])
 
-  const debounce = (fn, delay) => {
-    let timer
-    return (...args) => {
-      clearTimeout(timer)
-      timer = setTimeout(() => fn(...args), delay)
-    }
-  }
-
   const handleClick = useCallback(
-    debounce((choice) => {
-      setUserChoice(choice)
-      setIsButtonDisabled(true)
+    (choice: Choice) => {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const debounce = <T extends (...args: any[]) => any>(fn: T, delay: number) => {
+        let timer: NodeJS.Timeout;
+        return (...args: Parameters<T>) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn(...args), delay);
+        };
+      };
+      /* eslint-enable @typescript-eslint/no-explicit-any */
 
-      if (isRandomChoice) {
-        const randomChoice = choices[Math.floor(Math.random() * choices.length)]
-        setComputerChoice(randomChoice)
-        const outcome = getResult(choice, randomChoice)
-        setResult(outcome)
-        updateScores(outcome)
-        updateGameHistory(choice, randomChoice, outcome, true)
 
-        axios.post(
-          'https://rockpaperscissorbackend.onrender.com/play',
-          { choice, computer: randomChoice, user_id: userId, random: isRandomChoice },
-          {
-            headers: { 'Content-Type': 'application/json; charset=utf-8' },
-            withCredentials: true
-          }
-        )
-        .catch((error) => {
-          console.error('Error:', error)
-          setResult('Error: Something went wrong! Please try again.')
-        })
-        .finally(() => {
-          setIsButtonDisabled(false)
-        })
-      } else {
-        axios.post(
-          'https://rockpaperscissorbackend.onrender.com/play',
-          { choice, user_id: userId, random: isRandomChoice },
-          {
-            headers: { 'Content-Type': 'application/json; charset=utf-8' },
-            withCredentials: true
-          }
-        )
-        .then((response) => {
-          const computer = response.data.computer_choice
-          const outcome = response.data.result
-          setComputerChoice(computer)
+      const getResult = (userChoice: Choice, computerChoice: Choice) => {
+        if (userChoice === computerChoice) return "It's a tie!"
+        if (
+          (userChoice === 'rock' && computerChoice === 'scissors') ||
+          (userChoice === 'scissors' && computerChoice === 'paper') ||
+          (userChoice === 'paper' && computerChoice === 'rock')
+        ) {
+          return 'You win!'
+        }
+        return 'Computer wins!'
+      }
+    
+      const updateScores = (outcome: Outcome) => {
+        if (outcome === 'You win!') setVictories((prev) => prev + 1)
+        else if (outcome === 'Computer wins!') setLosses((prev) => prev + 1)
+        else setTies((prev) => prev + 1)
+      }
+    
+      const updateGameHistory = (userChoice: Choice, computerChoice: Choice, result: Outcome, random: boolean) => {
+        setGameHistory((prev) => [...prev, { userChoice, computerChoice, result, random }])
+      }
+  
+      const debounced = debounce((choice) => {
+        setUserChoice(choice)
+        setIsButtonDisabled(true)
+  
+        if (isRandomChoice) {
+          const randomChoice = choices[Math.floor(Math.random() * choices.length)]
+          setComputerChoice(randomChoice)
+          const outcome = getResult(choice, randomChoice)
           setResult(outcome)
           updateScores(outcome)
-          updateGameHistory(choice, computer, outcome, false)
-        })
-        .catch((error) => {
-          console.error('Error:', error)
-          setResult('Error: Something went wrong! Please try again.')
-        })
-        .finally(() => {
-          setIsButtonDisabled(false)
-        })
-      }
-    }, 500),
-    [isRandomChoice, userId]
+          updateGameHistory(choice, randomChoice, outcome, true)
+  
+          axios.post(
+            'https://rockpaperscissorbackend.onrender.com/play',
+            { choice, computer: randomChoice, user_id: userId, random: isRandomChoice },
+            { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
+          )
+          .catch((error) => {
+            console.error('Error:', error)
+            setResult('Error: Something went wrong! Please try again.')
+          })
+          .finally(() => {
+            setIsButtonDisabled(false)
+          })
+        } else {
+          axios.post(
+            'https://rockpaperscissorbackend.onrender.com/play',
+            { choice, user_id: userId, random: isRandomChoice },
+            { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
+          )
+          .then((response) => {
+            const computer = response.data.computer_choice
+            const outcome = response.data.result
+            setComputerChoice(computer)
+            setResult(outcome)
+            updateScores(outcome)
+            updateGameHistory(choice, computer, outcome, false)
+          })
+          .catch((error) => {
+            console.error('Error:', error)
+            setResult('Error: Something went wrong! Please try again.')
+          })
+          .finally(() => {
+            setIsButtonDisabled(false)
+          })
+        }
+      }, 500);
+      
+      debounced(choice);
+    },
+    [isRandomChoice, userId, choices, setUserChoice, setIsButtonDisabled, setResult, setComputerChoice]
   )
-
-  const getResult = (userChoice, computerChoice) => {
-    if (userChoice === computerChoice) return "It's a tie!"
-    if (
-      (userChoice === 'rock' && computerChoice === 'scissors') ||
-      (userChoice === 'scissors' && computerChoice === 'paper') ||
-      (userChoice === 'paper' && computerChoice === 'rock')
-    ) {
-      return 'You win!'
-    }
-    return 'Computer wins!'
-  }
-
-  const updateScores = (outcome) => {
-    if (outcome === 'You win!') setVictories((prev) => prev + 1)
-    else if (outcome === 'Computer wins!') setLosses((prev) => prev + 1)
-    else setTies((prev) => prev + 1)
-  }
-
-  const updateGameHistory = (userChoice, computerChoice, result, random) => {
-    setGameHistory((prev) => [...prev, { userChoice, computerChoice, result, random }])
-  }
 
   const generateCSV = () => {
     const header = ['User Choice', 'Computer Choice', 'Result', 'Random']
@@ -150,7 +161,7 @@ export function RockPaperScissorsComponent() {
   const lossPercentage = totalGames > 0 ? (losses / totalGames) * 100 : 0
   const tiePercentage = totalGames > 0 ? (ties / totalGames) * 100 : 0
 
-  const getChoiceIcon = (choice) => {
+  const getChoiceIcon = (choice:Choice) => {
     switch (choice) {
       case 'rock': return <Hand className="w-8 h-8" />
       case 'paper': return <Square className="w-8 h-8" />
@@ -191,7 +202,7 @@ export function RockPaperScissorsComponent() {
             {userChoice && (
               <div className="text-center mb-4">
                 <p className="text-lg font-semibold">Your choice: {userChoice}</p>
-                <p className="text-lg font-semibold">Computer's choice: {computerChoice}</p>
+                <p className="text-lg font-semibold">Computer&rsquo;s choice: {computerChoice}</p>
                 <p className="text-xl font-bold mt-2">{result}</p>
               </div>
             )}
