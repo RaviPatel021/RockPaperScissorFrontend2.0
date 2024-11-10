@@ -4,7 +4,8 @@ import React, {useMemo, useState, useCallback, useTransition, useEffect } from '
 import axios from 'axios'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Hand, Square, Scissors, Download } from 'lucide-react'
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Hand, Square, Scissors, Download, AlertTriangle } from 'lucide-react'
 
 export function RockPaperScissorsComponent() {
   const [userChoice, setUserChoice] = useState('')
@@ -13,6 +14,7 @@ export function RockPaperScissorsComponent() {
   const [victories, setVictories] = useState(0)
   const [losses, setLosses] = useState(0)
   const [ties, setTies] = useState(0)
+  const [showWarning, setShowWarning] = useState(true)
   type Outcome = 'You win!' | 'Computer wins!' | 'It\'s a tie!';
   type Choice = 'rock' | 'paper' | 'scissors';
   interface GameHistory {
@@ -117,6 +119,7 @@ export function RockPaperScissorsComponent() {
           })
           .finally(() => {
             setIsButtonDisabled(false)
+            setShowWarning(false)
           })
         }
       }, 500);
@@ -227,6 +230,15 @@ export function RockPaperScissorsComponent() {
             )}
           </CardContent>
         </Card>
+
+        {showWarning && (
+          <Alert variant="destructive" className="mb-8 bg-yellow-50 text-yellow-800 border-yellow-300">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+            The first click may take up to a minute to load as the backend server goes to sleep after a period of inactivity. Thank you for your patience!
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card className="mb-8">
           <CardHeader>
