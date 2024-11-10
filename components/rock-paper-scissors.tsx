@@ -98,6 +98,7 @@ export function RockPaperScissorsComponent() {
           })
           .finally(() => {
             setIsButtonDisabled(false)
+            setShowWarning(false)
           })
         } else {
           axios.post(
