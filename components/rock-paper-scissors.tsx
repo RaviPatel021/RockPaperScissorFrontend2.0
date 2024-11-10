@@ -4,7 +4,6 @@ import React, {useMemo, useState, useCallback, useTransition, useEffect } from '
 import axios from 'axios'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
 import { Hand, Square, Scissors, Download } from 'lucide-react'
 
 export function RockPaperScissorsComponent() {
@@ -178,13 +177,33 @@ export function RockPaperScissorsComponent() {
             <CardTitle className="text-3xl font-bold text-center">Rock Paper Scissors</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-sm font-medium">Random Mode</span>
-              <Switch
-                checked={isRandomChoice}
-                onCheckedChange={handleToggleRandom}
-                disabled={isPending}
-              />
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex items-center rounded-full bg-gray-100 p-1">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleToggleRandom()}
+                  className={`relative rounded-full px-6 py-2 text-sm font-medium transition-colors ${
+                    isRandomChoice === true
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  disabled={isPending}
+                >
+                  Random
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleToggleRandom()}
+                  className={`relative rounded-full px-6 py-2 text-sm font-medium transition-colors ${
+                    isRandomChoice === false
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  disabled={isPending}
+                >
+                  Smart
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-3 gap-4 mb-6">
               {choices.map((choice) => (
