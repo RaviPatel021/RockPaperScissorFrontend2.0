@@ -9,7 +9,7 @@ import { Hand, Square, Scissors, Download, AlertTriangle } from 'lucide-react'
 import { NameInputPopup } from './name-input-popup'
 import { Leaderboard } from './leaderboard'
 
-const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 
 export function RockPaperScissorsComponent() {
@@ -156,7 +156,7 @@ export function RockPaperScissorsComponent() {
       
       debounced(choice);
     },
-    [isRandomChoice, userId, choices, setUserChoice, setIsButtonDisabled, setResult, setComputerChoice, winPercentage, tiePercentage, lossPercentage, totalGames, userName,]
+    [isRandomChoice, userId, choices, setUserChoice, setIsButtonDisabled, setResult, setComputerChoice, winPercentage, tiePercentage, lossPercentage, totalGames, userName, apiUrl]
   )
 
   const generateCSV = () => {

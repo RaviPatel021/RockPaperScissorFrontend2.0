@@ -5,7 +5,6 @@ import axios from 'axios'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-const apiUrl = process.env.REACT_APP_API_URL;
 
 
 interface LeaderboardEntry {
@@ -20,9 +19,12 @@ interface LeaderboardEntry {
 export function Leaderboard({ userId }: { userId: string }) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  console.log('API URL:', apiUrl);
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
+        console.log('API URL:', apiUrl);
         const response = await axios.get(`${apiUrl}/leaderboard`)
         setLeaderboard(response.data)
       } catch (error) {
