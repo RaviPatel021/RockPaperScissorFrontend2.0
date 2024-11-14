@@ -104,7 +104,7 @@ export function RockPaperScissorsComponent() {
           updateGameHistory(choice, randomChoice, outcome, true)
   
           axios.post(
-            'http://10.0.103.145:5000/play',
+            'https://rockpaperscissorbackend.onrender.com/play',
             { choice, computer: randomChoice, user_id: userId, random: isRandomChoice },
             { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
           )
@@ -118,7 +118,7 @@ export function RockPaperScissorsComponent() {
           })
         } else {
           axios.post(
-            'http://10.0.103.145:5000/play',
+            'https://rockpaperscissorbackend.onrender.com/play',
             { choice, user_id: userId, random: isRandomChoice },
             { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
           )
@@ -131,7 +131,7 @@ export function RockPaperScissorsComponent() {
             updateGameHistory(choice, computer, outcome, false)
 
 
-            return axios.post('http://10.0.103.145:5000/update-leaderboard', {
+            return axios.post('https://rockpaperscissorbackend.onrender.com/update-leaderboard', {
               userId,
               userName,        // Include the username if needed
               win: round(winPercentage, 2),     // Calculate wins based on outcome

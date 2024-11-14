@@ -20,7 +20,7 @@ export function Leaderboard({ userId }: { userId: string }) {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await axios.get('http://10.0.103.145:5000/leaderboard')
+        const response = await axios.get('https://rockpaperscissorbackend.onrender.com/leaderboard')
         setLeaderboard(response.data)
       } catch (error) {
         console.error('Error fetching leaderboard:', error)
