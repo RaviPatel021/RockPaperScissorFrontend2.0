@@ -9,6 +9,9 @@ import { Hand, Square, Scissors, Download, AlertTriangle } from 'lucide-react'
 import { NameInputPopup } from './name-input-popup'
 import { Leaderboard } from './leaderboard'
 
+const apiUrl = process.env.REACT_APP_API_URL;
+
+
 export function RockPaperScissorsComponent() {
   const [userChoice, setUserChoice] = useState('')
   const [computerChoice, setComputerChoice] = useState('')
@@ -104,7 +107,7 @@ export function RockPaperScissorsComponent() {
           updateGameHistory(choice, randomChoice, outcome, true)
   
           axios.post(
-            'https://rockpaperscissorbackend.onrender.com/play',
+            `${apiUrl}/play`,
             { choice, computer: randomChoice, user_id: userId, random: isRandomChoice },
             { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
           )
@@ -118,7 +121,7 @@ export function RockPaperScissorsComponent() {
           })
         } else {
           axios.post(
-            'https://rockpaperscissorbackend.onrender.com/play',
+            `${apiUrl}/play`,
             { choice, user_id: userId, random: isRandomChoice },
             { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
           )
@@ -131,7 +134,7 @@ export function RockPaperScissorsComponent() {
             updateGameHistory(choice, computer, outcome, false)
 
 
-            return axios.post('https://rockpaperscissorbackend.onrender.com/update-leaderboard', {
+            return axios.post(`${apiUrl}/update-leaderboard`, {
               userId,
               userName,        // Include the username if needed
               win: round(winPercentage, 2),     // Calculate wins based on outcome
@@ -321,7 +324,7 @@ export function RockPaperScissorsComponent() {
             <Download className="mr-2 h-4 w-4" /> Download Game History
           </Button>
         )}
-
+      <p className="text-center mb-4 text-sm text-gray-600">Play more than 50 times to get a chance to show up on the leaderboard!</p>
       <Leaderboard userId={userId} />
       </div>
     </div>

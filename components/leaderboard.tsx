@@ -5,6 +5,9 @@ import axios from 'axios'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
+const apiUrl = process.env.REACT_APP_API_URL;
+
+
 interface LeaderboardEntry {
     userId: string;
     UserName: string;
@@ -20,7 +23,7 @@ export function Leaderboard({ userId }: { userId: string }) {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await axios.get('https://rockpaperscissorbackend.onrender.com/leaderboard')
+        const response = await axios.get(`${apiUrl}/leaderboard`)
         setLeaderboard(response.data)
       } catch (error) {
         console.error('Error fetching leaderboard:', error)
@@ -47,9 +50,9 @@ export function Leaderboard({ userId }: { userId: string }) {
             <TableRow>
               <TableHead>Rank</TableHead>
               <TableHead>Username</TableHead>
-              <TableHead>Wins</TableHead>
-              <TableHead>Losses</TableHead>
-              <TableHead>Ties</TableHead>
+              <TableHead>Win(%)</TableHead>
+              <TableHead>Loss(%)</TableHead>
+              <TableHead>Tie(%)</TableHead>
               <TableHead>Total Games</TableHead>
             </TableRow>
           </TableHeader>
