@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Hand, Square, Scissors, Download, AlertTriangle } from 'lucide-react'
+import { NameInputPopup } from './name-input-popup'
+import { Leaderboard } from './leaderboard'
 
 export function RockPaperScissorsComponent() {
   const [userChoice, setUserChoice] = useState('')
@@ -15,6 +17,10 @@ export function RockPaperScissorsComponent() {
   const [losses, setLosses] = useState(0)
   const [ties, setTies] = useState(0)
   const [showWarning, setShowWarning] = useState(true)
+  const [showNamePopup, setShowNamePopup] = useState(true)
+  const [userName, setUserName] = useState('')
+
+
   type Outcome = 'You win!' | 'Computer wins!' | 'It\'s a tie!';
   type Choice = 'rock' | 'paper' | 'scissors';
   interface GameHistory {
@@ -30,7 +36,14 @@ export function RockPaperScissorsComponent() {
   const [isPending, startTransition] = useTransition()
   const [userId, setUserId] = useState('')
   const choices = useMemo<Choice[]>(() => ['rock', 'paper', 'scissors'], []);
-  
+  const totalGames = victories + losses + ties
+  const winPercentage = totalGames > 0 ? (victories / totalGames) * 100 : 0
+  const lossPercentage = totalGames > 0 ? (losses / totalGames) * 100 : 0
+  const tiePercentage = totalGames > 0 ? (ties / totalGames) * 100 : 0
+  const handleNameSubmit = (name: string) => {
+    setUserName(name)
+    setShowNamePopup(false)
+  }
 
   useEffect(() => {
     const generateUserId = () => {
@@ -51,6 +64,9 @@ export function RockPaperScissorsComponent() {
         };
       };
       /* eslint-enable @typescript-eslint/no-explicit-any */
+
+      // Round to two decimal places using toFixed
+      const round = (number: number, decimals: number): number => parseFloat(number.toFixed(decimals));
 
 
       const getResult = (userChoice: Choice, computerChoice: Choice) => {
@@ -88,7 +104,7 @@ export function RockPaperScissorsComponent() {
           updateGameHistory(choice, randomChoice, outcome, true)
   
           axios.post(
-            'https://rockpaperscissorbackend.onrender.com/play',
+            'http://10.0.103.145:5000/play',
             { choice, computer: randomChoice, user_id: userId, random: isRandomChoice },
             { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
           )
@@ -102,7 +118,7 @@ export function RockPaperScissorsComponent() {
           })
         } else {
           axios.post(
-            'https://rockpaperscissorbackend.onrender.com/play',
+            'http://10.0.103.145:5000/play',
             { choice, user_id: userId, random: isRandomChoice },
             { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
           )
@@ -113,6 +129,16 @@ export function RockPaperScissorsComponent() {
             setResult(outcome)
             updateScores(outcome)
             updateGameHistory(choice, computer, outcome, false)
+
+
+            return axios.post('http://10.0.103.145:5000/update-leaderboard', {
+              userId,
+              userName,        // Include the username if needed
+              win: round(winPercentage, 2),     // Calculate wins based on outcome
+              tie: round(tiePercentage, 2),     // Calculate ties based on outcome
+              loss: round(lossPercentage, 2),   // Calculate losses based on outcome
+              total: totalGames,                          // Increment total games (assuming 1 game played)
+            })
           })
           .catch((error) => {
             console.error('Error:', error)
@@ -127,7 +153,7 @@ export function RockPaperScissorsComponent() {
       
       debounced(choice);
     },
-    [isRandomChoice, userId, choices, setUserChoice, setIsButtonDisabled, setResult, setComputerChoice]
+    [isRandomChoice, userId, choices, setUserChoice, setIsButtonDisabled, setResult, setComputerChoice, winPercentage, tiePercentage, lossPercentage, totalGames, userName,]
   )
 
   const generateCSV = () => {
@@ -159,10 +185,7 @@ export function RockPaperScissorsComponent() {
     }
   }
 
-  const totalGames = victories + losses + ties
-  const winPercentage = totalGames > 0 ? (victories / totalGames) * 100 : 0
-  const lossPercentage = totalGames > 0 ? (losses / totalGames) * 100 : 0
-  const tiePercentage = totalGames > 0 ? (ties / totalGames) * 100 : 0
+
 
   const getChoiceIcon = (choice:Choice) => {
     switch (choice) {
@@ -175,6 +198,7 @@ export function RockPaperScissorsComponent() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      {showNamePopup && <NameInputPopup onNameSubmit={handleNameSubmit} />}
       <div className="max-w-3xl mx-auto">
         <Card className="mb-8">
           <CardHeader>
@@ -297,6 +321,8 @@ export function RockPaperScissorsComponent() {
             <Download className="mr-2 h-4 w-4" /> Download Game History
           </Button>
         )}
+
+      <Leaderboard userId={userId} />
       </div>
     </div>
   )
