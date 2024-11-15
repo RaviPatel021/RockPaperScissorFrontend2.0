@@ -122,8 +122,9 @@ export function RockPaperScissorsComponent() {
         } else {
           axios.post(
             `${apiUrl}/play`,
-            { choice, user_id: userId, random: isRandomChoice,
-              userId,
+            { choice, 
+              user_id: userId, 
+              random: isRandomChoice,
               userName,        // Include the username if needed
               win: round(winPercentage, 2),     // Calculate wins based on outcome
               tie: round(tiePercentage, 2),     // Calculate ties based on outcome
