@@ -173,10 +173,10 @@ export function RockPaperScissorsComponent() {
     }
   }
 
-  const handleToggleRandom = () => {
-    if (window.confirm('Switching modes will reset your score. Do you wish to continue?')) {
+  const handleToggleRandom = (isRandom: boolean) => {
+    if (isRandom != isRandomChoice && window.confirm('Switching modes will reset your score. Do you wish to continue?')) {
       startTransition(() => {
-        setIsRandomChoice((prev) => !prev)
+        setIsRandomChoice(isRandom)
         setVictories(0)
         setLosses(0)
         setTies(0)
@@ -212,11 +212,10 @@ export function RockPaperScissorsComponent() {
               <div className="inline-flex items-center rounded-full bg-gray-100 p-1">
                 <Button
                   variant="ghost"
-                  onClick={() => handleToggleRandom()}
+                  title="In this mode computer will choose randomly"
+                  onClick={() => handleToggleRandom(true)}
                   className={`relative rounded-full px-6 py-2 text-sm font-medium transition-colors ${
-                    isRandomChoice === true
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900'
+                    isRandomChoice ? 'bg-gray-900 text-white' : 'text-gray-600 lg:hover:text-gray-900'
                   }`}
                   disabled={isPending}
                 >
@@ -224,11 +223,10 @@ export function RockPaperScissorsComponent() {
                 </Button>
                 <Button
                   variant="ghost"
-                  onClick={() => handleToggleRandom()}
+                  title="In this mode computer will try to predict your next move"
+                  onClick={() => handleToggleRandom(false)}
                   className={`relative rounded-full px-6 py-2 text-sm font-medium transition-colors ${
-                    isRandomChoice === false
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900'
+                    !isRandomChoice ? 'bg-gray-900 text-white' : 'text-gray-600 lg:hover:text-gray-900'
                   }`}
                   disabled={isPending}
                 >
