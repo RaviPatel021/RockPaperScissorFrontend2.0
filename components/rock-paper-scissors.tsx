@@ -122,7 +122,14 @@ export function RockPaperScissorsComponent() {
         } else {
           axios.post(
             `${apiUrl}/play`,
-            { choice, user_id: userId, random: isRandomChoice },
+            { choice, user_id: userId, random: isRandomChoice,
+              userId,
+              userName,        // Include the username if needed
+              win: round(winPercentage, 2),     // Calculate wins based on outcome
+              tie: round(tiePercentage, 2),     // Calculate ties based on outcome
+              loss: round(lossPercentage, 2),   // Calculate losses based on outcome
+              total: totalGames,                          // Increment total games (assuming 1 game played)
+            },
             { headers: { 'Content-Type': 'application/json; charset=utf-8' }, withCredentials: true }
           )
           .then((response) => {
@@ -132,16 +139,6 @@ export function RockPaperScissorsComponent() {
             setResult(outcome)
             updateScores(outcome)
             updateGameHistory(choice, computer, outcome, false)
-
-
-            return axios.post(`${apiUrl}/update-leaderboard`, {
-              userId,
-              userName,        // Include the username if needed
-              win: round(winPercentage, 2),     // Calculate wins based on outcome
-              tie: round(tiePercentage, 2),     // Calculate ties based on outcome
-              loss: round(lossPercentage, 2),   // Calculate losses based on outcome
-              total: totalGames,                          // Increment total games (assuming 1 game played)
-            })
           })
           .catch((error) => {
             console.error('Error:', error)
@@ -152,7 +149,7 @@ export function RockPaperScissorsComponent() {
             setShowWarning(false)
           })
         }
-      }, 500);
+      }, 300);
       
       debounced(choice);
     },
@@ -318,11 +315,13 @@ export function RockPaperScissorsComponent() {
         </Card>
 
         {totalGames > 0 && (
-          <Button onClick={generateCSV} className="w-full">
-            <Download className="mr-2 h-4 w-4" /> Download Game History
-          </Button>
+          <div className="mb-6">
+            <Button onClick={generateCSV} className="w-full">
+              <Download className="mr-2 h-4 w-4" /> Download Game History
+            </Button>
+          </div>
         )}
-      <p className="text-center mb-4 text-sm text-gray-600">Play more than 50 times to get a chance to show up on the leaderboard!</p>
+      <p className="text-center mb-8 text-sm text-gray-600">Play more than 50 times to get a chance to show up on the leaderboard!</p>
       <Leaderboard userId={userId} />
       </div>
     </div>
